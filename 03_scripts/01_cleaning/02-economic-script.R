@@ -101,10 +101,24 @@ calculate_ratio <- function(CONSTANT_PARA) {
 ratio_result <- calculate_ratio(CONSTANT_PARA)
 
 
-gdp.wdi <- gdp.wdi %>% mutate (gdpcons = ratio_result * gdpcons) # turning WDI constant 2015 to constant 2023
+gdp.wdi <- gdp.wdi %>% 
+  mutate (gdpcons = ratio_result * gdpcons) # turning WDI constant 2015 to latest year constant
 
 
-# =====================================================================================================================================
+
+gdp.wdi <- gdp.wdi %>%
+  group_by(iso3c) %>%
+  fill(gdp, .direction = "downup")
+
+gdp.wdi <- gdp.wdi %>%
+  group_by(iso3c) %>%
+  fill(gdpcons, .direction = "downup")
+
+gdp.wdi <- gdp.wdi %>%
+  group_by(iso3c) %>%
+  fill(gdpconsppp, .direction = "downup")
+
+# ==================================================================================================================
 
 ## GDP per cap Constant
 

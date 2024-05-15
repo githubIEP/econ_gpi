@@ -30,11 +30,9 @@ pos <- unique(gpidata$iso3c)
 
 # GPI grid ----------------------------------------------------------------
 
-gpi.country <- read_csv("02_data/processed/gpi.country.csv")
+gpi.grid <- GPI_COUNTRY[["iso3c"]]
 
-gpi.grid <- gpi.country[["iso3c"]]
-
-gpi.grid <- expand.grid(year=c(FIRST_GPI_YEAR:LATEST_YEAR), iso3c=unique(gpi.country$iso3c))
+gpi.grid <- expand.grid(year=c(FIRST_GPI_YEAR:LATEST_YEAR), iso3c=unique(GPI_COUNTRY$iso3c))
 
 
 tab <- function(data){
@@ -42,11 +40,8 @@ tab <- function(data){
   View(t)
 }
 
-
-Peace_and_region <- read_excel("02_data/processed/Peace and region.xlsx",                               
-                               col_types = c("text", "text", "numeric"))
-
-Peace_and_region <- Peace_and_region %>%  rename(`GPI overall score`=`2020 Peace level`)
+Peace_and_region <- PEACE_AND_REGION %>% 
+  rename(`GPI overall score`=`2020 Peace level`)
 
 Peace_and_region$peace_level = ifelse(Peace_and_region$`GPI overall score` <= 1.45, "Very High Peace", 
                                       ifelse(Peace_and_region$`GPI overall score` >= 1.45 & Peace_and_region$`GPI overall score` <= 1.9, "High Peace", 
@@ -54,8 +49,6 @@ Peace_and_region$peace_level = ifelse(Peace_and_region$`GPI overall score` <= 1.
                                                     ifelse(Peace_and_region$`GPI overall score` >= 2.4 & Peace_and_region$`GPI overall score` <= 2.9, "Low Peace",
                                                            ifelse(Peace_and_region$`GPI overall score` >= 2.9, "Very Low Peace", NA)))))
 Peace_and_region <- Peace_and_region %>% select(-`GPI overall score`)
-
-
 
 ######################################################## POPULATION  ############################################################
 

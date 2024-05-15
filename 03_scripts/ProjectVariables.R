@@ -13,6 +13,8 @@ PEACEBUILDING_YEAR = 3 # Update this number every year by one
 
 
 ### Read Files and data ###
+PEACE_AND_REGION = read_excel("02_data/processed/Peace and region.xlsx", col_types = c("text", "text", "numeric"))
+GPI_COUNTRY <- read_csv("02_data/processed/gpi.country.csv")
 GPI_DATA = readRDS("02_data/processed/GPI_2024_EconomicCosting.rds")
 UNIT_COST = read_excel("02_data/processed/unit costs for gpi2022.xlsx", sheet = "unit costs r")
 WHITE_HOUSE = "https://www.whitehouse.gov/wp-content/uploads/2022/03/hist05z1_fy2023.xlsx" 
