@@ -40,7 +40,7 @@ IEP_USERPATH = "C:\\Users\\KaranMenon\\OneDrive - Institute for Economics and Pe
 
 
 
-#### Charts
+#### Charts ######
 CHART_UNIT = "cm"
 
 ONEDRIVE = paste0(IEP_USERPATH,"/Global Peace Index/",REPORT_YEAR," GPI")

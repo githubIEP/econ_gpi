@@ -1,3 +1,7 @@
+# Unit Costs
+# This is the unit cost data frame.
+# The unit costs are then scaled for all countries and for all years by using the PPP scale
+
 unitcost <- UNIT_COST
 unitcost <- within(unitcost, indicator <- paste(Indicator, type,sep='.'))
 unitcost <- unitcost[,c("indicator", "unitcost")]
@@ -6,7 +10,15 @@ unitcost2 <- cbind(ppp, unitcost)
 unitcost.scaled <- mutate_at(unitcost2,vars(`fear.indirect`:`violentassault.indirect`), funs(.*scale) )
 unitcost.scaled <- unitcost.scaled[,c(2,1,4:15)]
 
-#VET AFFAIRS
+#VET AFFAIRS ===========================================================================================================
+
+# This code downloads the vet affairs data frame from the white house website
+# The code then filters for Total veterans benefits and services.
+# The code then gives the total amount and estimates fro 1976 to 2027
+# The code also adds interest to the veteran costs. 
+# Finally we combine this vet data frame with the GPI grid data frame to include all the GPI countries
+# All GPI countries except for USA are set to 0. 
+
 
 temp = tempfile(fileext = ".xlsx")
 dataURL <- WHITE_HOUSE
@@ -52,6 +64,14 @@ vet <- vet %>%
   rename(vet = value) %>%
   dplyr::select(-c(`variablename`))
 
+
+
+# Suicide ===============================================================================================================
+
+# This code downloads suicide data from the World Bank
+# This is then combined with the GPI grid data frame to include all GPI countries to complete the data frame.
+# The code then counts the number NAs in the data frame
+# The code then imputes the missing values with last available data, as well as using regional peace averages
 
 
 suicide <- f_get.wdi("all","SH.STA.SUIC.P5",2006,LATEST_YEAR) %>% 
@@ -103,6 +123,13 @@ suicide <- suicide %>%
   rename(suicidevalue=value)
 
 
+
+# This code pull the data from the GPI data set, which is the perceptions of criminality
+# This code then fills the data set with all the GPI countries and years completing the data frame
+# The dataset is complete but has NAs
+# These NA's are then filled in through imputation using the fill() function
+ 
+
 fear <- gpidata %>%
   subset(indicator=="perceptions of criminality") %>%   rename_all(tolower) %>%
   select("iso3c", "year", "value")  %>%
@@ -116,6 +143,12 @@ fear <- fear %>%
   fill(value, .direction = "downup")
 fear <- fear %>% 
   rename(iso3c = geocode) %>% rename(fear = value)
+
+
+# This gathers UNHCR funding from the UNHCR data set. 
+# The UNHCR data set is combined with UNHCR data from 2021. 
+# Once these are combined then the GPI grid data frame is added to it
+# This completes data set, and fills in the NA values through imputation. 
 
 ########### UNHCR funding #########
 unhcr <- UNHCR %>%
@@ -147,6 +180,16 @@ unhcr <- unhcr %>%
 unhcr <- gpi.grid %>% left_join(unhcr)
 
 #################################### Violent assault ###################################
+# This code pulls violent assault data
+# The raw data frame has 3 column (country, year and value).
+# We use the country code package to add the the three letter iso country code column
+# However we have to manually rename country code, for example, Kosovo as the raw data has Kosovo listed as "Kosovo under UNSCR 1244"
+# We rename the Kosovo in the country column as well. 
+# We now add a new column called 'variablename' to the data frame
+# This data frame is now  combined with the GPI country grid to fill all countries for all years. 
+# It runs a loop to count missing values
+# Once that is completed all the missing values are filled in with regional and peace averages
+
 violent.assault <- VIOLENT_ASSAULT %>% 
   rename(country=Country, year=Year, value=Rate) %>%
   select(country, year, value) %>% 
@@ -236,7 +279,13 @@ violent.assault <- violent.assault %>%
 violent.assault <- violent.assault[violent.assault$iso3c %in% pos,]
 rm(violent.assault.average)
 rm(violent.assault.peace.level)
-#################### Sexual violence #############################
+
+#################### Sexual violence #####################################################################################
+
+# Sexual assault data is pulled from the Sexual data frame
+# And the same process and transformations to the data frame are done to this data set as the Violent assault data set
+
+
 # Not in GPI data 
 sexual.assault <- SEXUAL_ASSAULT %>% 
   rename(country=Country, year=Year, value="Measure Values", rate="Measure Names") %>% 
@@ -359,6 +408,13 @@ crime2 <- crime2 %>%
   spread(variablename,value)
 
 
+# Small Arms ==================================================================================================================
+# Small arms 
+# This pulls data from the Small arms data frame 
+# The raw data does not have the three letter iso code, so the code adds the iso3c column
+# The code then combines it with the gpi grid data frame and completes the data frame with all  the GPI countries
+# 
+
 
 small.arms <- SMALL_ARMS %>%  
   mutate(value = value * 1000000)
@@ -385,7 +441,11 @@ small.arms <- small.arms %>%
   mutate (sarms = case_when(is.na(sarms) ~ 0,
                             TRUE ~ sarms ))
 
-
+# Security agency data is drawn from the security agency data frame
+# The raw data set has 3 columns (country, year, secu. agency)
+# the code then adds the iso country code column
+# We then combine it with the gpi grid data frame
+# the code then assigns all the missing values with corresponding regional peace averages to complete the data frame
 
 secu.agnecy <- SECU_AGENCY %>%
   mutate(X2007=X2008, X2019=X2018,X2020=X2018,X2021=X2018, X2022=X2018, X2023=X2018)%>%
@@ -412,14 +472,18 @@ secu.agnecy <- secu.agnecy %>%
   mutate (secu.agnecy = coalesce(secu.agnecy, average)) %>% 
   select (c(`year`, `iso3c`, `secu.agnecy`))
 
-
-
+# Peacebuilding ================================================================================================================
+# This code filters the raw data set to only 'Official development assistance'.
+# It is then additionally filtered for 'Gross Disbursements'
+# The code then aggregates the peace building funding for each country
+# The code then completes the data frame with all the GPI countries by left joining with the gpi grid data frame
+# This creates NA's for some countries and those are set to zero
 
 pb <- PEACEBUILDING %>%   
   mutate(iso3c=countrycode(Recipient,"country.name","iso3c")) %>% 
   mutate(iso3c=ifelse(Recipient=="Kosovo","KSV",iso3c))
 pb <- pb[pb$iso3c %in% pos,]
-# Check that that coutnrys are the ones we actually want
+# Check that that coutnries are the ones we actually want
 country.list <- as.data.frame(table(pb$Recipient))
 rm(country.list)
 pb.countries <- PEACEBUILDING_FUNDING
@@ -452,6 +516,15 @@ peacebuilding <- gpi.grid %>%
 peacebuilding <- peacebuilding %>%
   mutate (peacebuilding = case_when(is.na(peacebuilding) ~ 0,
                                     TRUE ~ peacebuilding ))
+
+
+# Private Security ================================================================================================================
+
+# This code pulls private security data from 2007 and 2022
+# The code then has adds the column for the latest year
+# The code then corrects the names for country codes
+# The code then completes the data frame by combining it with the population and multiply it the rate
+# This is then combined with the gpi grid data frame.
 
 
 f_LibraryLoader(tidyverse,rio)
@@ -549,11 +622,11 @@ pos.exp <- pos.exp[pos.exp$year>2006,]
 pos.exp <- pos.exp[pos.exp$iso3c %in% pos,]
 pos.exp <- subset(pos.exp,!(year<2006))
 #use gdp current not the constant calc, you'll apply constant later 
-pos.exp <- pos.exp %>% 
-  merge(gdp.wdi[,c("iso3c","year","gdp")],by=c("iso3c","year")) %>% 
-  mutate(value=value/100) %>%
-  mutate(intsecu=value*gdp) %>%
-  distinct()
+ pos.exp <- pos.exp %>% 
+   merge(gdp.wdi[,c("iso3c","year","gdp")],by=c("iso3c","year")) %>% 
+   mutate(value=value/100) %>%
+   mutate(intsecu=value*gdp) %>%
+   distinct()
 pos.exp <- subset(pos.exp, select = c(iso3c,year,intsecu))
 pos.exp1 <- gpi.grid %>% 
   left_join(pos.exp)

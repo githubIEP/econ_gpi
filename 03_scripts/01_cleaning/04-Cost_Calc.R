@@ -1,36 +1,30 @@
+# List of data frames to join
+data_frames <- list(
+  homicide, conflict, gti.sum, fear, suicide, priv.secu, secu.agnecy,
+  small.arms, peacebuilding, peacekeeping, unhcr, vet, deflator,
+  unitcost.scaled, milex, gdp.wdi, incar, refugidp, gdplosses, ppp, pop, ppp.conv
+)
 
-COST.df <- crime2 %>%
-  left_join(homicide) %>%
-  left_join(conflict) %>%
-  left_join(gti.sum) %>%
-  left_join(fear) %>%
-  left_join(suicide) %>%
-  left_join(priv.secu) %>%
-  left_join(secu.agnecy) %>%
-  left_join(small.arms) %>%
-  left_join(peacebuilding) %>%
-  left_join(peacekeeping) %>%
-  left_join(unhcr) %>%
-  left_join(vet) %>%
-  left_join(deflator) %>%
-  left_join(unitcost.scaled) %>%
-  left_join(milex) %>%
-  left_join(gdp.wdi) %>%
-  left_join(incar) %>%
-  left_join(refugidp) %>%
-  left_join(gdplosses) %>%
-  left_join(ppp) %>%
-  left_join(pop) %>%
-  left_join(ppp.conv) %>%
+# Perform left joins in a loop
+COST.df <- crime2
+for(df in data_frames) {
+  COST.df <- COST.df %>% left_join(df)
+}
+
+# Rename and join the final data frame
+COST.df <- COST.df %>%
   rename(con.median = value) %>%
   left_join(pos.exp)
 
+# fill in the NA's 
 
 COST.df <- COST.df %>%
   dplyr::select(-c(`indicator`, `variablename`))
 COST.df <- COST.df %>%
   mutate(priv.secu = ifelse(is.na(priv.secu),0,priv.secu))
 
+
+# Check to see if there are any NAs
 na <- sum(is.na(COST.df)) 
 na
 
@@ -49,6 +43,8 @@ COST.df <- COST.df %>%
 COST.df <- COST.df %>%
   distinct()
 
+
+# Dividing these cost estimators with GDP deflator
 COST.df <- mutate_at(COST.df, vars(`milex`,
                                    `intsecu`, 
                                    `privsecu.cost`,
@@ -60,6 +56,7 @@ COST.df <- mutate_at(COST.df, vars(`milex`,
                                    `vet`),
                      funs(./deflator))
 
+# Renaming these variables
 COST.df <- COST.df %>%
   rename(milex.dir.cost = milex, 
          intsecu.dir.cost = intsecu, 
@@ -69,6 +66,11 @@ COST.df <- COST.df %>%
          peacebuilding.dir.cost = peacebuilding,
          vet.dir.cost = vet,
          unhcr.dir.cost = unhcr)
+
+
+# This next chunk of code converts this data frame from wide to long
+# This coverts all the cost indicators from wide to long except for country, year, population, GDP and PPP factor.
+# This will create 10 columns.
 
 COST.df <- COST.df %>% 
   subset(select=c(`iso3c`, 
@@ -112,12 +114,22 @@ COST.df <- COST.df %>%
   rename(costusd = value) %>%
   rename(pop = population)
 cost <- COST.df
+
+# So these are the cost indicators that are not in constant USD PPP
 pos.ppp <- c("gdplosses", "intsecu", "milex", "peacebuilding", "peacekeep", "privsecu",
              "refugeidp", "sarms", "secu.agnecy", "unhcr", "vet")
 
+# This code initializes a binary column, that selects indicators in the pos.ppp list would given a 1 and the others a 0.
+# The reason for this is create a new Cost PPP column, the columns where PPP = 1, are the converted to cost PPP by dividing it to ppp convertor
 cost$ppp <- as.integer(cost$indicator %in% pos.ppp)
 cost$costppp <- ifelse(cost$ppp == "1", cost$costusd/cost$con.median, cost$costusd )
 cost$type[cost$indicator=="gdplosses"]='indirect'
+
+
+# This is creating the cost impact column
+# The econ impact of violence is direct costs + indirect costs + multiplier (direct costs)
+# This code looks at the `type` column and checks if the the cost type is direct. If it is then it multiplies it by 2 to account for the multiplier
+# if the cost type in indirect then the cost type is just the cost PPP. 
 
 cost <- cost %>%
   mutate(impact = case_when(
@@ -167,3 +179,6 @@ tmp <- econcost %>%
   ungroup()
 
 rio::export(econcost, "04_outputs/Economic Impact of Violence1.xlsx")
+
+
+

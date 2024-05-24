@@ -10,16 +10,9 @@ options (scipen = 999)
 
 source("03_scripts/ProjectFunction.R")
 source("03_scripts/ProjectVariables.R")
-
-
-
-script_dir <- "03_scripts/01_cleaning"
-
-script_files <- list.files(script_dir, pattern = "\\.R$", full.names = TRUE)
-
-for (script_file in script_files) {
-  source(script_file)
-}
-
+source("03_scripts/01_cleaning/01-admin.R")
+source("03_scripts/01_cleaning/02-economic-script.R")
+source("03_scripts/01_cleaning/03-Cost_data_frame.R")
+source("03_scripts/01_cleaning/04-Cost_Calc.R")
 source("03_scripts/02_standardOutputs/Section 3 - EconCostingCharts.R")
 source("03_scripts/ProjectExport.R")

@@ -1,4 +1,4 @@
-
+# Getting GPI data from from the GPI data set 
 # GPI data ----------------------------------------------------------------
 gpidata <- pivot_longer(data = GPI_DATA,
                         cols = c(`population`, 
@@ -28,6 +28,9 @@ gpidata <- gpidata %>%
 pos <- unique(gpidata$iso3c)
 
 
+# This grid is necessary to fill all subsequent data frames with all the GPI countries. We would then fill any missing values with imputation 
+# or regional peace averages
+
 # GPI grid ----------------------------------------------------------------
 
 gpi.grid <- GPI_COUNTRY[["iso3c"]]
@@ -49,6 +52,10 @@ Peace_and_region$peace_level = ifelse(Peace_and_region$`GPI overall score` <= 1.
                                                     ifelse(Peace_and_region$`GPI overall score` >= 2.4 & Peace_and_region$`GPI overall score` <= 2.9, "Low Peace",
                                                            ifelse(Peace_and_region$`GPI overall score` >= 2.9, "Very Low Peace", NA)))))
 Peace_and_region <- Peace_and_region %>% select(-`GPI overall score`)
+
+
+
+# Population data will used seperatly fill fill in missing values as well as for per capita estimates
 
 ######################################################## POPULATION  ############################################################
 
