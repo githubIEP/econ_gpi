@@ -553,7 +553,21 @@ priv.secu <- priv.secu %>%
   full_join(gpi.grid, by=c("iso3c", "year")) %>%
   rename(priv.secu = value)
 
-# Internal security  ------------------------------------------------------
+# Internal security  =================================================================================================
+
+# Internal security data is pulled and is filtered for expenditures for public order and safety
+# public expenditures are rounded to one decimal place 
+# The data set for public expenditures and safety is then combined with the gpi grid to complete the data frame
+# The code then creates a loops through which counts the number of missing countries and determine which ones to keep and which ones to delete
+# It then creates a data frame of missing countries called "count_of_missing". 
+# This data frame is then left-joined to the main data frame
+# The code then imputes the missing countries which have more than 1 value
+# The next step is to multiply the value (% of GDP spent on public order and safety) with the GDP current. (This will be converted to constant later)
+# This gives us the dollar amount spent on public order and safety.
+# This is however only for 67 countries, therefore there are 96 countries missing.
+# To fill this in we use the police rate from the GPI data 
+# The police rate data is then multiplied by the unit cost for police direct costs
+# This is then combined with the original data frame to complete the data frame for 163 countries. 
 
 pos.exp <- INTERNAL_SECURITY %>%
   rename(variable.name="COFOG Function", country="Country")
@@ -684,6 +698,12 @@ pos.exp <- pos.exp %>%
 pos.exp <- gpi.grid %>% left_join(pos.exp)
 
 
+# Terrorism Deaths ==========================================================================================
+
+# This code pulls terrorism deaths from the main GPI data frame
+# It filters for only those who were killed
+# it combines this data frame with the gpi grid to complete the data frame
+# All countries that have na are now filled in with 0
 
 
 gti.sum <- GPI_DATA %>%
@@ -695,6 +715,11 @@ gti.sum <- gpi.grid %>%
 gti.sum <- gti.sum %>%
   mutate (killed = case_when (is.na(killed) ~ 0,
                                                    TRUE ~ killed))
+# Peacekeeping Data ===============================================================================================
+
+# Peacekeeping data is drawn from the main GPI data set
+# It is then combined with gpi grid to include all gpi countries
+# The missing country data is then filled in through imputation
 
 
 peacekeeping <- GPI_DATA %>% 
@@ -714,6 +739,10 @@ peacekeeping <- gpi.grid %>%
 
 
 
+# GPI data ==================================================================================================================
+
+# The code is to create a gpi data frame which includes only homicide, terrorism deaths, military expenditure, in peacekeeping funding, refugees and idps, perception of criminality
+# This is then later used for creating individual data frames
 
 
 gpidata <- pivot_longer(data = GPI_DATA,
@@ -731,6 +760,12 @@ gpidata <- gpidata %>%
                                                       indicator == "incarceration" ~ "incarceration rate",
                                                       indicator == "Peacekeeping" ~ "un peacekeeping funding",
                                                       TRUE ~ indicator))
+
+
+# Homicide ================================================================================================================
+
+# This code now looks at homicide data from the above gpi data
+# This data is completed using gpi grid data and missing or na values are imputed
 
 
 homicide <- gpidata %>% 
@@ -751,7 +786,11 @@ homicide <- gpi.grid %>%
   rename(homicide = value)
 
 
-# incarceration rate ------------------------------------------------------
+# incarceration rate =========================================================================================================
+
+# Similiar to the homicide data frame, incarceration data is drawn from the gpi data set
+# Na values are imputed after the gpi grid data is combined. 
+
 
 incar <- gpidata%>% 
   subset(indicator=="incarceration rate") %>%
@@ -771,7 +810,12 @@ incar <- gpi.grid %>%
   rename(incar = value)
 
 
-# conflcit deaths -------------------------------------------------------------
+# conflcit deaths =========================================================================================================
+
+# This conflict data set is drawn from the gpi data set
+# It completes the data frame for all 163 countries by combining it with gpi grid data 
+# Missing na values are imputed to fill the entire data frame
+
 
 conflict <- gpidata %>% 
   subset(indicator== "battle_deaths")
@@ -790,7 +834,16 @@ conflict <- gpi.grid %>%
   left_join(conflict)
 
 
-# refugees and IDPs -------------------------------------------------------
+# refugees and IDPs ==============================================================================================================
+
+# We start by creating a population data frame that we will use later
+# The refugee data is pulled from the gpi data set
+# We combine the refugee numbers with gdp constant per capita to get the cost of refugees and idps 
+# We make a few assumptions here (40% of refugees are children) and (10% resettlement rate)
+# Once we get the refugee costs, we include all GPI countries
+# All NA values are then imputed to complete the data frame
+
+
 pop3 <- pop %>% rename(pop=population)
 refugidp <- gpidata %>% 
   subset(indicator=="displaced" ) %>% 
@@ -816,6 +869,13 @@ refugidp <- gpi.grid %>%
 
 
 # GDP losses for countries with >1000 deaths ------------------------------
+
+# This code starts with creating a new data frame from the conflict data frame
+# The first chunk of code initializes a binary column, where it assigns a value of 1 for battle deaths over 999 and 0 for battle deaths under 999
+# For all deaths the are over 999, the deaths are multiplied by constant gdp
+# finally the code filters for year after 2007 to the latest year.
+# Lastly the data frame is completed with the gpi grid data and na values are imputed.
+
 gdplosses <- conflict %>% 
   mutate(conflict=ifelse(battle_deaths>999,1,0)) %>%
   merge(gdp.wdi[,c("iso3c","year","gdpcons")], by=c("iso3c","year"), all=TRUE) %>%
@@ -836,7 +896,10 @@ gdplosses <- gpi.grid %>%
 
 
 
+# GPI Data =========================================================================================================
 
+
+# We go back to re creating the gpi data to what it looked like before by filtering to include homicide, terrorism deaths, military expenditure, in peacekeeping funding, refugees and idps, perception of criminality
 
 
 
@@ -854,6 +917,17 @@ gpidata <- gpidata %>% mutate (indicator = case_when (indicator == "Terrorism de
                                                       indicator == "Incarceration rate per 100,000" ~ "incarceration rate",
                                                       indicator == "Peacekeeping" ~ "un peacekeeping funding",
                                                       TRUE ~ indicator))
+
+
+# Military expenditure ===========================================================================================
+
+# We use two different data sources to complete the military data frame
+# We use the GPI data to get military exp as a % of gdp for years prior to 2022
+# We use Sipri data to get military exp as a % of gdp after 2022
+# These two data frames are combined along with the gpi grid data frame to get a complete data frame for all countries and all years
+# All na values are then imputed
+
+
 milex <- gpidata %>% 
   subset(indicator=="military expenditure (% gdp)") %>% 
   mutate(value = value /100) %>%

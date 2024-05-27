@@ -156,6 +156,11 @@ indicator_map <- c("assault" = "Violent crime", "battle" = "Conflict deaths", "f
                    "unhcr" = "Refugees and IDPs", "vet" = "Military expenditure", "wounded" = "Terrorism")
 cost$indicator2 <- indicator_map[cost$indicator]
 
+
+# Sanity check
+# This checks if there are any NA in the data frame
+# If there are any the code then prints which columns have the NA values
+
 na <- sum(is.na(cost))
 na
 na_counts <- colSums(is.na(cost))
@@ -163,6 +168,7 @@ columns_with_na <- which(na_counts > 0)
 names_with_na <- names(cost)[columns_with_na]
 names_with_na
 
+# Selects the columns necessary for the final cost data frame
 econcost <- cost %>%
   select(iso3c, year, indicator, costusd, type, gdp, gdpcons, gdpconsppp, pop, costppp, impact, domain, indicator2) %>%
   gather(subtype, value, -c(iso3c, year, indicator, type, domain, indicator2)) %>%
@@ -172,11 +178,14 @@ econcost$value[econcost$indicator == "gdplosses" & econcost$iso3c %in% c("IND", 
 econcost <- econcost %>% distinct()
 econcost$country[econcost$iso3c == "KSV"] <- "Kosovo"
 
+# this tmp data frame looks at the impact data trend over the years
 tmp <- econcost %>%
   subset(subtype=="impact") %>% 
   group_by(year) %>% 
   summarise(total=sum(value)) %>%
   ungroup()
+
+# save the final data frame as an excel file
 
 rio::export(econcost, "04_outputs/Economic Impact of Violence1.xlsx")
 
