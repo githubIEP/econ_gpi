@@ -34,12 +34,6 @@ SIPRI_MILEX = read_excel("02_data/processed/SIPRI-Milex-data-1949-2022.xlsx", sh
 
 
 
-
-
-IEP_USERPATH = "C:\\Users\\KaranMenon\\OneDrive - Institute for Economics and Peace\\Institute for Economics and Peace"
-
-
-
 #### Charts ######
 CHART_UNIT = "cm"
 
