@@ -89,7 +89,7 @@ gdp.wdi <- wdi.data %>%
   mutate(across(c(gdp, gdpcons, gdpconsppp), ~ as.numeric(as.character(.))))
 
 # We now create a function to be used to convert gdp from constant 2017 to constant in the latest year
-# It starts by pulling GDP deflator from the US from the wdi data and treats it like a separate object
+# It starts by pulling the US GDP deflator from the wdi data and treats it like a separate object
 # The next set of codes creates a function which create the latest year constant coefficient
 # The function starts by pulling the latest year and last value in the data frame and by pulling the row with where the gdp deflator = 100
 # the coefficient is called ratio as it takes the value = 100 and divides it by latest value in the data frame
