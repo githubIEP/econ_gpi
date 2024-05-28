@@ -64,4 +64,3 @@ MAPS <- list(
 HEAVY_FONT = "Helvetica LT Pro" 
 LIGHT_FONT = "Helvetica LT Pro Light" 
 
-
