@@ -127,7 +127,7 @@ gdp.wdi <- gdp.wdi %>%
 # ==================================================================================================================
 
 ## GDP per cap Constant
-# We now use the ratio coefficient to convert the gdp per cap constant to gdp per cap constant in the current year
+# We now use the ratio coefficient to convert the gdp per cap constant to gdp per cap constant in the latest year
 
 gdp.pc.constant <- wdi.data %>%
   dplyr::filter(variablename == "GDP per cap Constant") %>%
