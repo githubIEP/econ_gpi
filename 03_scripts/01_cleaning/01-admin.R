@@ -55,7 +55,7 @@ Peace_and_region <- Peace_and_region %>% select(-`GPI overall score`)
 
 
 
-# Population data will used seperatly fill  in missing values as well as for per capita estimates
+# Population data will used separately fill in missing values as well as for per capita estimates+
 
 ######################################################## POPULATION  ############################################################
 
