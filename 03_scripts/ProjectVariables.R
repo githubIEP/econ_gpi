@@ -13,6 +13,7 @@ PEACEBUILDING_YEAR = 3 # Update this number every year by one
 
 
 ### Read Files and data ###
+TOTAL_ASSAULT_TEST <- "https://dataunodc.un.org/sites/dataunodc.un.org/files/data_cts_violent_and_sexual_crime.xlsx"
 PEACE_AND_REGION = read_excel("02_data/processed/Peace and region.xlsx", col_types = c("text", "text", "numeric"))
 GPI_COUNTRY <- read_csv("02_data/processed/gpi.country.csv")
 GPI_DATA = readRDS("02_data/processed/GPI_2024_EconomicCosting.rds")

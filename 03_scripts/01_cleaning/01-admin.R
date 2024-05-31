@@ -25,7 +25,7 @@ gpidata <- gpidata %>%
                                  indicator == "assessments" ~ "un peacekeeping funding",
                                  TRUE ~ indicator))
 
-pos <- unique(gpidata$iso3c)
+GPI_ISO <- unique(gpidata$iso3c)
 
 
 # This grid is necessary to fill all subsequent data frames with all the GPI countries. We would then fill any missing values with imputation 
@@ -33,9 +33,9 @@ pos <- unique(gpidata$iso3c)
 
 # GPI grid ----------------------------------------------------------------
 
-gpi.grid <- GPI_COUNTRY[["iso3c"]]
+GPI_GRID.df <- GPI_COUNTRY[["iso3c"]]
 
-gpi.grid <- expand.grid(year=c(FIRST_GPI_YEAR:LATEST_YEAR), iso3c=unique(GPI_COUNTRY$iso3c))
+GPI_GRID.df <- expand.grid(year=c(FIRST_GPI_YEAR:LATEST_YEAR), iso3c=unique(GPI_COUNTRY$iso3c))
 
 
 tab <- function(data){

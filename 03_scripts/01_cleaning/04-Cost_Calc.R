@@ -1,12 +1,12 @@
 # List of data frames to join
 data_frames <- list(
-  homicide, conflict, gti.sum, fear, suicide, priv.secu, secu.agnecy,
-  small.arms, peacebuilding, peacekeeping, unhcr, vet, deflator,
-  unitcost.scaled, milex, gdp.wdi, incar, refugidp, gdplosses, ppp, pop, ppp.conv
+  HOMICIDE.df, CONFLICT.df, GTI_SUM.df, FEAR.df, SUICIDE.df, Private_Secu.df, Secu_Agency.df,
+  Small_Arms.df, Peacebuilding_Cleaned.df, PEACEKEEPING.df, UNHCR.df, Vet.df, deflator,
+  UNITCOST_SCALED.df, MILITARY_EXP.df, gdp.wdi, INCARCERATION.df, REFUGEE.df, GDP_LOSSES.df, ppp, pop, ppp.conv
 )
 
 # Perform left joins in a loop
-COST.df <- crime2
+COST.df <- CRIME_CLEANED.df
 for(df in data_frames) {
   COST.df <- COST.df %>% left_join(df)
 }
@@ -14,12 +14,13 @@ for(df in data_frames) {
 # Rename and join the final data frame
 COST.df <- COST.df %>%
   rename(con.median = value) %>%
-  left_join(pos.exp)
+  left_join(Internal_Exp.df)
 
 # fill in the NA's 
 
 COST.df <- COST.df %>%
   dplyr::select(-c(`indicator`, `variablename`))
+
 COST.df <- COST.df %>%
   mutate(priv.secu = ifelse(is.na(priv.secu),0,priv.secu))
 
@@ -48,7 +49,7 @@ COST.df <- COST.df %>%
 COST.df <- mutate_at(COST.df, vars(`milex`,
                                    `intsecu`, 
                                    `privsecu.cost`,
-                                   `secu.agnecy`,
+                                   `secu.agency`,
                                    `sarms`,
                                    `peacebuilding`, 
                                    `peacekeep`, 

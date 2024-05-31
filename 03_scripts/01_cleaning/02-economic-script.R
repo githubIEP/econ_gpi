@@ -171,7 +171,7 @@ ppp.conv  <- ppp.conv  %>%
 ## PPP US Ratio
 # These set of codes creates the PPP scale which will be used to multiply it with the unit costs in the next script
 # We start by creating the the GDP cap for all countries
-# we then filter out the the per capita for USA and treat it like a seperate data frame
+# we then filter out the the per capita for USA and treat it like a separate data frame
 # we then left join both data frames and divide the US per cap ppp with the rest of the countries 
 # We get the PPP scale which later be applied to the unit costs in the next script
 
